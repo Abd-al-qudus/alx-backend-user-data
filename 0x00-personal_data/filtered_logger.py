@@ -16,8 +16,10 @@ def filter_datum(
         separator: str
 ):
     """use a regex to replace occurrences of certain field values"""
-    return re.sub(r'(' + '|'.join(fields) + r')=[^' + separator + r']*',
-                  redaction, message)
+    for field in fields:
+        message = re.sub(field+'=.*?'+separator,
+                         field+'='+redaction+separator, message)
+    return message
 
 
 class RedactingFormatter(logging.Formatter):

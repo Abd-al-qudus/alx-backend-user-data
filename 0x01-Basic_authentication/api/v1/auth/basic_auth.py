@@ -2,7 +2,8 @@
 """A basic authentication frame that inherits from Auth"""
 from api.v1.auth.auth import Auth
 from models.user import User
-from typing import TypeVar
+from typing import TypeVar, Tuple
+import re
 import binascii
 import base64
 
@@ -42,19 +43,23 @@ class BasicAuth(Auth):
             return None
 
     def extract_user_credentials(
-        self,
-            decoded_base64_authorization_header: str) -> (str, str):
-        """returns the user email and password from the Base64 decoded value"""
-        if decoded_base64_authorization_header is None:
-            return None, None
-        if not isinstance(decoded_base64_authorization_header, str):
-            return None, None
-        if ":" not in decoded_base64_authorization_header:
-            return None, None
-        email, password = decoded_base64_authorization_header.split(":")
-        if not email or not password:
-            return None, None
-        return email, password
+            self,
+            decoded_base64_authorization_header: str,
+            ) -> Tuple[str, str]:
+        """Extracts user credentials from a base64-decoded authorization
+        header that uses the Basic authentication flow.
+        """
+        if type(decoded_base64_authorization_header) == str:
+            pattern = r'(?P<user>[^:]+):(?P<password>.+)'
+            field_match = re.fullmatch(
+                pattern,
+                decoded_base64_authorization_header.strip(),
+            )
+            if field_match is not None:
+                user = field_match.group('user')
+                password = field_match.group('password')
+                return user, password
+        return None, None
 
     def user_object_from_credentials(
         self,
@@ -69,6 +74,14 @@ class BasicAuth(Auth):
             user = User.search({'email': user_email})
         except Exception:
             return None
-        if len(user) == 0 or user[0].is_valid_password(user_pwd):
+        if len(user) <= 0 or user[0].is_valid_password(user_pwd):
             return None
         return user[0]
+
+    def current_user(self, request=None) -> TypeVar('User'):
+        """Retrieves the user from a request"""
+        auth_header = self.authorization_header(request)
+        b64_auth_token = self.extract_base64_authorization_header(auth_header)
+        auth_token = self.decode_base64_authorization_header(b64_auth_token)
+        email, password = self.extract_user_credentials(auth_token)
+        return self.user_object_from_credentials(email, password)

@@ -46,13 +46,13 @@ def not_found(error) -> str:
 @app.errorhandler(403)
 def forbidden(error) -> str:
     """handle forbidden routes"""
-    return jsonify({"error": "Forbidden"}), 401
+    return jsonify({"error": "Forbidden"}), 403
 
 
 @app.errorhandler(401)
-def forbidden(error) -> str:
+def unauthorized(error) -> str:
     """handle unauthorized routes"""
-    return jsonify({"error": "Unauthorized"}), 403
+    return jsonify({"error": "Unauthorized"}), 401
 
 
 if __name__ == "__main__":

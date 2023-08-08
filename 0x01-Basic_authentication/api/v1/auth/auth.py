@@ -23,9 +23,10 @@ class Auth:
         """check the authorizatiion header"""
         if request is None:
             return None
-        if not request.headers.get("Authorization"):
+        header = request.headers.get("Authorization")
+        if header is None:
             return None
-        return request.headers.get("Authorization")
+        return header
 
     def current_user(self, request=None) -> TypeVar('User'):
         """check the snapshot of the user instance"""

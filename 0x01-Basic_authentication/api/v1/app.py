@@ -31,9 +31,9 @@ def before_request():
     if auth.require_auth(request.path, excluded_paths):
         return
     if auth.authorization_header(request) is None:
-        raise abort(401)
+        abort(401, description="Unauthorized")
     if auth.current_user(request) is None:
-        raise abort(403)
+        abort(403, description="Forbidden")
 
 
 @app.errorhandler(404)
@@ -43,10 +43,16 @@ def not_found(error) -> str:
     return jsonify({"error": "Not found"}), 404
 
 
-@app.errorhandler(401)
+@app.errorhandler(403)
 def forbidden(error) -> str:
     """handle forbidden routes"""
-    return jsonify({"error": "Forbidden"}), 403
+    return jsonify({"error": "Forbidden"}), 401
+
+
+@app.errorhandler(401)
+def forbidden(error) -> str:
+    """handle unauthorized routes"""
+    return jsonify({"error": "Unauthorized"}), 403
 
 
 if __name__ == "__main__":

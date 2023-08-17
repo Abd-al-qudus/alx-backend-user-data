@@ -8,7 +8,7 @@ email = 'bob@bob.com'
 password = 'MyPwdOfBob'
 auth = Auth()
 
-# auth.register_user(email, password)
+auth.register_user(email, password)
 
 print(auth.valid_login(email, password))
 

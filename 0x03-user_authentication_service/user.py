@@ -1,19 +1,23 @@
 #!/usr/bin/env python3
-"""a user model for sql alchemy"""
+"""
+Declare a SQLAlchemy model named 'User' corresponding to a
+database table named "users"
+"""
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import (
     Column,
-    String,
     Integer,
+    String,
 )
-
 
 Base = declarative_base()
 
 
 class User(Base):
-    """sqlalchemy mapping class for the user model"""
-    __tablename__ = 'users'
+    """
+    Definition of class User
+    """
+    __tablename__ = "users"
 
     id = Column(Integer, primary_key=True)
     email = Column(String(250), nullable=False)
